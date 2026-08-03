@@ -27,11 +27,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 
 # Application definition
 
@@ -47,7 +49,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'accounts',
-    'organization'
+    'organization',
+    'documents'
 ]
 
 MIDDLEWARE = [
@@ -174,3 +177,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
 }
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"

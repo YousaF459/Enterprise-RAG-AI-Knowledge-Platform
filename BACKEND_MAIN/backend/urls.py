@@ -24,6 +24,7 @@ urlpatterns = [
     # Authentications and User EndPoints
     path('accounts/',include('accounts.urls')),
     path('organization/',include('organization.urls')),
+    path('document/',include('documents.urls')),
 
 
     # drf spectacular swagger   

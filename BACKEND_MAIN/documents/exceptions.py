@@ -1,0 +1,3 @@
+
+class LLMServiceUnavailable(Exception):
+    pass
