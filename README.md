@@ -168,6 +168,10 @@ POSTGRESQL_DATABASE_PASSWORD=postgress-password
 
 
 JWT_SECRET_KEY=your_JWT_secret_key
+GEMINI_API_KEY=your_gemini_api_key
+
+GEMINI_MODEL =your_selected_model
+
 
 ---
 

@@ -17,6 +17,7 @@ from documents.models import DocumentChunk
 from pgvector.django import CosineDistance
 from documents.retreival import retrieve_chunks
 from documents.llm import generate_answer
+from .exceptions import LLMServiceUnavailable,EmbeddingGenerationError,RetrievalError
 from documents.embedding import generate_embedding
 # Create your views here.
 
@@ -102,11 +103,49 @@ class QuestionSearchView(APIView):
 
             question=serializer.validated_data['question']
 
-            question_embedding = generate_embedding(question)
 
-            query_results=retrieve_chunks(question_embedding,request.user.organization)
-        
-            answer = generate_answer(question, query_results)
+            # Generate semantic embedding for the user's question
+            try:
+                question_embedding = generate_embedding(question)
+            except EmbeddingGenerationError:
+                return Response({
+                    "error": "Unable to search the knowledge base at the moment. Please try again later."
+                },status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+            # Retrieve the most relevant document chunks
+
+            try:
+                query_results=retrieve_chunks(question_embedding,request.user.organization)
+            except RetrievalError:
+                return Response({
+                "error":"Unable to search the knowledge base at the moment. Please try again later"
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+            if not query_results:
+                return Response(
+                {
+                "question": question,
+                "answer": "I couldn't find that information in the uploaded documents.",
+                "sources": []
+                },
+                status=status.HTTP_200_OK
+                )
+
+            # Generate an answer using the retrieved context
+            try:
+
+                answer = generate_answer(question, query_results)
+
+            except LLMServiceUnavailable:
+            
+                return Response(
+                {
+                "error": "AI service is temporarily unavailable. Please try again later."
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
 
             sources=[
                 {
@@ -117,13 +156,16 @@ class QuestionSearchView(APIView):
             ]
 
             return Response(
-    {
-        "question": question,
-        "answer": answer,
-        "sources":sources
-    },
-                status=status.HTTP_200_OK,
+            {
+            "question": question,
+            "answer": answer,
+            "sources":sources
+            },
+            status=status.HTTP_200_OK,
             )
+
+
+        
 
 
         

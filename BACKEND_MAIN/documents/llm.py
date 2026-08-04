@@ -1,6 +1,9 @@
 from google import genai
 from django.conf import settings
+import logging
 from documents.exceptions import LLMServiceUnavailable
+
+logger=logging.getLogger(__name__)
 
 client=genai.Client(
     api_key=settings.GEMINI_API_KEY
@@ -51,6 +54,8 @@ Sources:
 
 def generate_answer(question,chunks):
 
+    logger.info("Generating answer with Gemini")
+
     try:
 
         prompt=build_prompt(question,chunks)
@@ -60,7 +65,15 @@ def generate_answer(question,chunks):
         contents=prompt
         )
 
+
+        logger.info("Answer Generated succesfully")
+
         return response.text
 
     except Exception as e:
-        pass
+
+        logger.exception("Gemini Request Failed")
+
+        raise LLMServiceUnavailable(
+        "LLM service is currently unavailable."
+        ) from e
