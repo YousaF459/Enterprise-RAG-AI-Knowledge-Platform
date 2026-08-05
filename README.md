@@ -15,6 +15,35 @@ Employees can ask AI-powered questions and receive accurate, cited answers from 
 
 ---
 
+## API Preview
+
+### Swagger Overview
+
+### API Overview
+
+![Swagger Overview](images/swagger-overview.png)
+
+### Authentication APIs
+
+![Authentication](images/swagger-auth.png)
+
+### Document Management APIs
+
+![Documents](images/swagger-documents.png)
+
+### AI Question Answering
+
+![AI Endpoint](images/swagger-rag.png)
+
+### Asynchronous Document Processing
+
+Document uploads are processed asynchronously using Celery. Each uploaded document is chunked, converted into embeddings, and indexed in the vector database without blocking the API.
+
+![Celery Processing](images/celery-processing.png)
+
+
+---
+
 ## Problem We Solve
 
 Organizations often store critical knowledge across PDFs, Word documents, internal wikis, manuals, and policies. As this information grows, employees spend significant time searching through documents or asking colleagues for answers, leading to reduced productivity and inconsistent information.
@@ -77,7 +106,7 @@ The result is a faster, more reliable way for organizations to access and levera
 | Backend | Django, Django REST Framework |
 | Database | PostgreSQL, pgvector |
 | Background Tasks | Celery, Redis |
-| AI | OpenAI, Retrieval-Augmented Generation (RAG) |
+| AI | Google Gemini, Sentence Transformers, Retrieval-Augmented Generation (RAG) |
 | Containerization | Docker |
 | API Documentation | drf-spectacular (OpenAPI/Swagger) |
 | Authentication | JWT (Simple JWT) |
