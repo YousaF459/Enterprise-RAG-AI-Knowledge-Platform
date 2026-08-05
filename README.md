@@ -21,25 +21,25 @@ Employees can ask AI-powered questions and receive accurate, cited answers from 
 
 ### API Overview
 
-![Swagger Overview](images/swagger-overview.png)
+![Swagger Overview](./images/swagger-overview.png)
 
 ### Authentication APIs
 
-![Authentication](images/swagger-auth.png)
+![Authentication](./images/swagger-auth.png)
 
 ### Document Management APIs
 
-![Documents](images/swagger-documents.png)
+![Documents](./images/swagger-documents.png)
 
 ### AI Question Answering
 
-![AI Endpoint](images/swagger-rag.png)
+![AI Endpoint](./images/swagger-rag.png)
 
 ### Asynchronous Document Processing
 
 Document uploads are processed asynchronously using Celery. Each uploaded document is chunked, converted into embeddings, and indexed in the vector database without blocking the API.
 
-![Celery Processing](images/celery-processing.png)
+![Celery Processing](./images/celery-processing.png)
 
 
 ---
