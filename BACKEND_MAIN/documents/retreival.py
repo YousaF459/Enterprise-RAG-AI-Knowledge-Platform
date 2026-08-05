@@ -2,11 +2,11 @@ from pgvector.django import CosineDistance
 from documents.models import DocumentChunk
 from .exceptions import RetrievalError
 import logging
-
+from django.conf import settings
 
 logger=logging.getLogger(__name__)
 
-def retrieve_chunks(question_embedding,organization,top_k=5):
+def retrieve_chunks(question_embedding,organization,top_k=settings.TOP_K):
 
     try:
 

@@ -105,23 +105,11 @@ class QuestionSearchView(APIView):
 
 
             # Generate semantic embedding for the user's question
-            try:
-                question_embedding = generate_embedding(question)
-            except EmbeddingGenerationError:
-                return Response({
-                    "error": "Unable to search the knowledge base at the moment. Please try again later."
-                },status=status.HTTP_503_SERVICE_UNAVAILABLE)
-
+            question_embedding = generate_embedding(question)
+            
             # Retrieve the most relevant document chunks
-
-            try:
-                query_results=retrieve_chunks(question_embedding,request.user.organization)
-            except RetrievalError:
-                return Response({
-                "error":"Unable to search the knowledge base at the moment. Please try again later"
-                },
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-                )
+            query_results=retrieve_chunks(question_embedding,request.user.organization)
+            
 
             if not query_results:
                 return Response(
@@ -134,18 +122,7 @@ class QuestionSearchView(APIView):
                 )
 
             # Generate an answer using the retrieved context
-            try:
-
-                answer = generate_answer(question, query_results)
-
-            except LLMServiceUnavailable:
-            
-                return Response(
-                {
-                "error": "AI service is temporarily unavailable. Please try again later."
-                },
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
+            answer = generate_answer(question, query_results)
 
             sources=[
                 {

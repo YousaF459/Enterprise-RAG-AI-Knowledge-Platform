@@ -155,7 +155,9 @@ REST_FRAMEWORK={
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES':(
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    "EXCEPTION_HANDLER": "backend.exception_handler.custom_exception_handler",
+
 }
 
 SIMPLE_JWT = {
@@ -182,3 +184,6 @@ SPECTACULAR_SETTINGS = {
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+## chunks retreival amount
+TOP_K=os.getenv("TOP_K")
