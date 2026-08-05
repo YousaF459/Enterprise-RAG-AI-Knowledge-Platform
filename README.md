@@ -153,6 +153,52 @@ The result is a faster, more reliable way for organizations to access and levera
 
 ---
 
+## Project Workflow
+
+Employee asks a question
+        │
+        ▼
+JWT Authentication
+        │
+        ▼
+Generate Question Embedding
+        │
+        ▼
+Semantic Search (pgvector)
+        │
+        ▼
+Retrieve Top-K Chunks
+        │
+        ▼
+Build Prompt
+        │
+        ▼
+Gemini LLM
+        │
+        ▼
+Answer + Source Citations
+
+
+---
+
+## Document Processing Pipeline
+
+Upload PDF
+    │
+    ▼
+Extract Text
+    │
+    ▼
+Chunk Document
+    │
+    ▼
+Generate Embeddings
+    │
+    ▼
+Store in PostgreSQL + pgvector
+
+---
+
 ## Project Structure
 
 ```text
