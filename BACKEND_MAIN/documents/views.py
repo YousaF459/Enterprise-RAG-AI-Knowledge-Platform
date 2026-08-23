@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView,RetrieveAPIView
 from rest_framework.permissions import BasePermission
 from accounts.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -9,7 +9,6 @@ from .tasks import process_document
 from drf_spectacular.utils import extend_schema_view,extend_schema,OpenApiResponse
 from rest_framework.parsers import MultiPartParser,FormParser
 from rest_framework.views import APIView
-from documents.embedding import embedding_model
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.types import OpenApiTypes
@@ -18,6 +17,7 @@ from pgvector.django import CosineDistance
 from documents.retreival import retrieve_chunks
 from documents.llm import generate_answer
 from .exceptions import LLMServiceUnavailable,EmbeddingGenerationError,RetrievalError
+from .models import Document
 from documents.embedding import generate_embedding
 # Create your views here.
 
@@ -33,6 +33,12 @@ class IsEmployeeOrOrgADmin(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.role == User.Role.EMPLOYEE or request.user.role==User.Role.ORG_ADMIN
+
+## allow permission for Employee or Superadmin
+class IsSuperAdminOrOrgADmin(BasePermission):
+
+    def has_permission(self, request, view):
+        return request.user.role == User.Role.SUPER_ADMIN or request.user.role==User.Role.ORG_ADMIN
 
 
 
@@ -142,7 +148,67 @@ class QuestionSearchView(APIView):
             )
 
 
+## class to get documents related to user organization
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Documents"],
+        summary="Retreive Organization Documents",
+        description=(
+            "Retrieve documents available to the authenticated administrator. "
+            "SUPER_ADMIN users can retrieve documents from all organizations, "
+            "while ORG_ADMIN users can retrieve documents belonging only to "
+            "their own organization."
+        ),
+        responses=document_serializers.DocumentsSerializer(many=True),
+    )
+)
+class DocumentsListView(ListAPIView):
+
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated,IsSuperAdminOrOrgADmin]
+    serializer_class=document_serializers.DocumentsSerializer
+
+    def get_queryset(self):
+
+        user=self.request.user
+        organization=user.organization
+
+        if user.role == User.Role.SUPER_ADMIN:
+            return Document.objects.all()
         
+        return Document.objects.filter(organization=organization)
 
 
+## class to retreive A specific Document
+
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Documents"],
+        summary="Retrieve Document Details",
+        description=(
+            "Retrieve the details of a specific document. "
+            "SUPER_ADMIN users can retrieve documents from any organization, "
+            "while ORG_ADMIN users can retrieve documents belonging only to "
+            "their own organization."
+        ),
+        responses=document_serializers.DocumentSerializer,
+    )
+)
+class DocumentsRetreiveView(RetrieveAPIView):
+
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated,IsSuperAdminOrOrgADmin]
+    serializer_class=document_serializers.DocumentSerializer
+
+
+    def get_queryset(self):
+
+        user = self.request.user
+
+        if user.role == User.Role.SUPER_ADMIN:
+            return Document.objects.all()
+
+        return Document.objects.filter(
+            organization=user.organization
+        )
         

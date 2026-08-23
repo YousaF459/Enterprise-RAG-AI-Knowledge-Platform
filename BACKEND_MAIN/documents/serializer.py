@@ -23,3 +23,36 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
 
 class QuestionSearchSerializer(serializers.Serializer):
     question=serializers.CharField()
+
+
+class DocumentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=Document
+        fields = [
+            "id",
+            "organization",
+            "uploaded_by",
+            "title",
+            "file",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
+
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=Document
+        fields = [
+            "id",
+            "organization",
+            "uploaded_by",
+            "title",
+            "file",
+            "status",
+            "created_at",
+            "updated_at",
+        ]

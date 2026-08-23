@@ -2,14 +2,28 @@ from sentence_transformers import SentenceTransformer
 import logging
 from .exceptions import EmbeddingGenerationError
 
-embedding_model=SentenceTransformer("all-MiniLM-L6-v2")
+
 logger=logging.getLogger(__name__)
+
+embedding_model = None
+
+
+def get_embedding_model():
+
+    global embedding_model
+
+    if embedding_model is None:
+        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    return embedding_model
 
 def generate_embedding(text):
     try:
         logger.info("Generating text embedding")
+
+        model = get_embedding_model()
         
-        return embedding_model.encode(text)
+        return model.encode(text)
     
     except Exception as e:
         logging.exception("Embedding Generation Failed")
