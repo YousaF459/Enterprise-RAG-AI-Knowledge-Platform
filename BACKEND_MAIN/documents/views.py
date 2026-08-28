@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView,ListAPIView,RetrieveAPIView
+from rest_framework.generics import CreateAPIView,ListAPIView,RetrieveAPIView,DestroyAPIView,UpdateAPIView
 from rest_framework.permissions import BasePermission
 from accounts.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -77,7 +77,15 @@ class DocumentUploadView(CreateAPIView):
 
         document = serializer.save()
 
-        process_document.delay(document.id)
+        try:
+
+            process_document.delay(document.id)
+        except Exception:
+            document.status = Document.StatusChoice.FAILED
+            document.save()
+
+
+
 
 ## class view for user Questions adn search database for chunks
 
@@ -194,7 +202,7 @@ class DocumentsListView(ListAPIView):
         responses=document_serializers.DocumentSerializer,
     )
 )
-class DocumentsRetreiveView(RetrieveAPIView):
+class DocumentsRetrieveView(RetrieveAPIView):
 
     authentication_classes=[JWTAuthentication]
     permission_classes=[IsAuthenticated,IsSuperAdminOrOrgADmin]
@@ -211,4 +219,71 @@ class DocumentsRetreiveView(RetrieveAPIView):
         return Document.objects.filter(
             organization=user.organization
         )
+
+## class to delete a document
+@extend_schema_view(
+    delete=extend_schema(
+        summary="Delete Document",
+        description=(
+            "Delete a specific document. "
+            "ORG_ADMIN users can delete documents belonging only to "
+            "their own organization, while SUPER_ADMIN users can delete "
+            "documents from any organization."
+        ),
+        responses={
+            204: None,
+            404: None,
+        },
+    )
+)
+class DocumentDeleteView(DestroyAPIView):
+
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated,IsSuperAdminOrOrgADmin]
+
+    def get_queryset(self):
+    
+            user = self.request.user
+    
+            if user.role == User.Role.SUPER_ADMIN:
+                return Document.objects.all()
+    
+            return Document.objects.filter(
+                organization=user.organization
+            )
+
+## class to update Document Detail
+
+@extend_schema_view(
+    patch=extend_schema(
+        tags=["Documents"],
+        summary="Update Document",
+        description=(
+            "Update the title of a specific document. "
+            "ORG_ADMIN users can update documents belonging only to "
+            "their own organization, while SUPER_ADMIN users can update "
+            "documents from any organization."
+        ),
+        request=document_serializers.DocumentUpdateSerializer,
+        responses=document_serializers.DocumentSerializer,
+    )
+)
+class DocumentUpdateView(UpdateAPIView):
+
+    authentication_classes=[JWTAuthentication]
+    permission_classes=[IsAuthenticated,IsSuperAdminOrOrgADmin]
+    serializer_class = document_serializers.DocumentUpdateSerializer
+
+
+    def get_queryset(self):
         
+        user = self.request.user
+
+        if user.role == User.Role.SUPER_ADMIN:
+            return Document.objects.all()
+
+        return Document.objects.filter(
+            organization=user.organization
+        )
+
+

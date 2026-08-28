@@ -10,6 +10,23 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             'file',
         ]
 
+    def validate_file(self,value):
+
+        if value.content_type != "application/pdf":
+            raise serializers.ValidationError(
+                "Only PDF files are allowed."
+            )
+
+        max_size = 10 * 1024 * 1024  # 10 MB
+
+        if value.size > max_size:
+            raise serializers.ValidationError(
+            "File size must not exceed 10 MB."
+        )
+
+        return value
+
+
     def create(self,validated_data):
 
         user = self.context["request"].user
@@ -56,3 +73,9 @@ class DocumentSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+class DocumentUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Document
+        fields = ["title"]

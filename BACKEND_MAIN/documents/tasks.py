@@ -1,8 +1,8 @@
 from celery import shared_task
 from documents.models import Document,DocumentChunk
-import time
 from pypdf import PdfReader
-from documents.embedding import embedding_model,generate_embedding
+from documents.embedding import generate_embedding
+from django.db import transaction
 
 
 
@@ -10,10 +10,27 @@ from documents.embedding import embedding_model,generate_embedding
 @shared_task
 def process_document(document_id):
 
+    document=None
+
     try:
-        document=Document.objects.get(id=document_id)
-        document.status=Document.StatusChoice.PROCESSING
-        document.save(update_fields=['status'])
+
+        with transaction.atomic() :
+
+            document=Document.objects.select_for_update().get(id=document_id)
+
+            if document.status==Document.StatusChoice.READY:
+                return
+
+            if document.status == Document.StatusChoice.PROCESSING:
+                return
+
+            if document.status==Document.StatusChoice.FAILED:
+                DocumentChunk.objects.filter(
+                    document=document
+                ).delete()
+
+            document.status=Document.StatusChoice.PROCESSING
+            document.save(update_fields=['status'])
 
         print(f'Processing : {document.title}')
 
@@ -26,6 +43,9 @@ def process_document(document_id):
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
+
+        if not text.strip():
+            raise ValueError("No text could be extracted from the document")        
 
         chunk_size=1000
         overlap=200
@@ -55,11 +75,15 @@ def process_document(document_id):
 
     except Exception as e:
 
-        try:
-            document.status=Document.StatusChoice.FAILED
-            document.save(update_fields=['status'])
+        if document:
 
-        except:
-            pass
+            with transaction.atomic():
 
-        raise 
+                document = Document.objects.select_for_update().get(
+                    id=document_id
+                )
+
+                document.status = Document.StatusChoice.FAILED
+                document.save(update_fields=["status"])
+
+        raise
