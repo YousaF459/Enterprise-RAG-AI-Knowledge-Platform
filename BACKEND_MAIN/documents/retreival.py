@@ -11,7 +11,7 @@ def retrieve_chunks(question_embedding,organization,top_k=settings.TOP_K):
     try:
 
         logger.info("Chunks Retreival Started")
-
+        top_k=int(top_k)
         return (
         DocumentChunk.objects.filter(document__organization=organization).annotate(distance=CosineDistance('embedding',question_embedding)).order_by('distance')[:top_k]
         )

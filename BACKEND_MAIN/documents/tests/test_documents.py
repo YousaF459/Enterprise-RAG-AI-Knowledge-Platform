@@ -6,6 +6,8 @@ from unittest.mock import patch
 from reportlab.pdfgen import canvas
 import io
 import numpy as np
+from pathlib import Path
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from accounts.models import User
 from organization.models import Organization
@@ -352,8 +354,6 @@ class DocumentTestCase(TestCase):
         embedding=generate_embedding(text)  
         embedding=embedding.tolist()
 
-        print(embedding)
-        print(type(embedding))
 
         assert len(embedding) == 384
         assert isinstance(embedding,list)
@@ -386,7 +386,7 @@ class DocumentTestCase(TestCase):
         content="OLD CHUNK",
         chunk_index=0,
         embedding=np.zeros(384).tolist()
-    )
+        )
 
         # Remember the old chunk's database ID
         old_chunk_id = old_chunk.id
@@ -420,17 +420,4 @@ class DocumentTestCase(TestCase):
             assert len(new_chunk.embedding) == 384
             
             
-
-
-
-
-
-
-
-
-
-    
-    
-
-
-
+   
