@@ -53,9 +53,9 @@ class AuthenticationTests(TestCase):
             format="json"
         )
 
-        self.assertEqual(response.status_code,200)
-        self.assertIn("access",response.data)
-        self.assertIn("refresh",response.data)
+        self.assertEqual(response.status_code,401)
+        self.assertNotIn("access",response.data)
+        self.assertNotIn("refresh",response.data)
 
     def test_login_with_invalid_email(self):
     
@@ -70,9 +70,9 @@ class AuthenticationTests(TestCase):
 
         print(response.data)
 
-        self.assertEqual(response.status_code,200)
-        self.assertIn("access",response.data)
-        self.assertIn("refresh",response.data)
+        self.assertEqual(response.status_code,400)
+        self.assertNotIn("access",response.data)
+        self.assertNotIn("refresh",response.data)
 
 
     def test_token_refresh_view(self):
