@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'accounts',
     'organization',
-    'documents'
+    'documents',
+    'conversations'
 ]
 
 MIDDLEWARE = [

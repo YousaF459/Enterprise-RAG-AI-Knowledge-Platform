@@ -25,6 +25,7 @@ urlpatterns = [
     path('accounts/',include('accounts.urls')),
     path('organization/',include('organization.urls')),
     path('document/',include('documents.urls')),
+    path('conversation/',include('conversations.urls')),
 
 
     # drf spectacular swagger   

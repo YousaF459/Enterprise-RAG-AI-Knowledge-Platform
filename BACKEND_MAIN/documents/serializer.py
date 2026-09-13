@@ -38,8 +38,6 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class QuestionSearchSerializer(serializers.Serializer):
-    question=serializers.CharField()
 
 
 class DocumentsSerializer(serializers.ModelSerializer):

@@ -35,6 +35,9 @@ def custom_exception_handler(exc,context):
             status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
+    print(type(exc))
+    print(exc)
+
 
     return Response(
         {
